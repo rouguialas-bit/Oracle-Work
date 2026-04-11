@@ -11,7 +11,8 @@ const PORT = process.env.PORT || 3002;
 const dbConfig = {
   user: process.env.DB_USER || 'YOUR_DB_USER',
   password: process.env.DB_PASSWORD || 'YOUR_DB_PASSWORD',
-  connectString: process.env.DB_CONNECT_STRING || 'localhost/XE'
+  connectString: process.env.DB_CONNECT_STRING || 'localhost/XE',
+  sysdba: process.env.DB_SYSDBA === 'true'
 };
 
 app.use(cors());
@@ -29,7 +30,16 @@ app.get('/', (req, res) => {
 app.get('/test-connection', async (req, res) => {
   let connection;
   try {
-    connection = await oracledb.getConnection(dbConfig);
+    const connectOptions = {
+      user: dbConfig.user,
+      password: dbConfig.password,
+      connectString: dbConfig.connectString
+    };
+    if (dbConfig.sysdba || dbConfig.user.toUpperCase() === 'SYS') {
+      connectOptions.privilege = oracledb.SYSDBA;
+    }
+
+    connection = await oracledb.getConnection(connectOptions);
     const result = await connection.execute('SELECT 1 FROM dual');
     res.json({ status: 'ok', result: result.rows });
   } catch (error) {
@@ -52,7 +62,16 @@ app.post('/log-connection', async (req, res) => {
   console.log('[Server] /log-connection body:', req.body);
 
   try {
-    connection = await oracledb.getConnection(dbConfig);
+    const connectOptions = {
+      user: dbConfig.user,
+      password: dbConfig.password,
+      connectString: dbConfig.connectString
+    };
+    if (dbConfig.sysdba || dbConfig.user.toUpperCase() === 'SYS') {
+      connectOptions.privilege = oracledb.SYSDBA;
+    }
+
+    connection = await oracledb.getConnection(connectOptions);
     console.log('[Server] Oracle connection opened');
     await connection.execute(
       `INSERT INTO CONNECTION_LOG (message, created_at) VALUES (:message, SYSTIMESTAMP)`,
@@ -79,7 +98,16 @@ app.post('/log-connection', async (req, res) => {
 app.get('/data', async (req, res) => {
   let connection;
   try {
-    connection = await oracledb.getConnection(dbConfig);
+    const connectOptions = {
+      user: dbConfig.user,
+      password: dbConfig.password,
+      connectString: dbConfig.connectString
+    };
+    if (dbConfig.sysdba || dbConfig.user.toUpperCase() === 'SYS') {
+      connectOptions.privilege = oracledb.SYSDBA;
+    }
+
+    connection = await oracledb.getConnection(connectOptions);
     const result = await connection.execute(
       `SELECT * FROM YOUR_TABLE WHERE ROWNUM <= 20`,
       [],
