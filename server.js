@@ -13,7 +13,7 @@ const dbConfig = {
   password: process.env.DB_PASSWORD || 'YOUR_DB_PASSWORD',
   connectString: process.env.DB_CONNECT_STRING || 'localhost/XE',
   sysdba: process.env.DB_SYSDBA === 'true'
-};
+}; 
 
 app.use(cors());
 app.use(express.json());
@@ -79,7 +79,7 @@ app.post('/log-connection', async (req, res) => {
       { autoCommit: true }
     );
     console.log('[Server] Insert completed');
-    res.json({ status: 'ok', message: 'Message enregistré en base.' });
+    res.json({ status: 'ok', message: 'Connexion à la base Oracle a reussie !.' });
   } catch (error) {
     console.error('[Server] Oracle log-connection error:', error);
     res.status(500).json({ status: 'error', message: error.message });
